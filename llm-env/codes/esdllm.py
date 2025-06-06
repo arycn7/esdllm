@@ -30,7 +30,7 @@ if model_files_exist:
         model_path,
         device_map="auto",
         max_memory={
-            "0": "10GB",  # adjust if needed to slightly below total GPU VRAM
+            0: "10GB",  # adjust if needed to slightly below total GPU VRAM
             "cpu": "60GB"
         },
         offload_folder="./offload",  # folder for offloaded tensors
@@ -48,7 +48,7 @@ else:
         model_id,
         device_map="auto",
         max_memory={
-            "0": "10GB",
+            0: "10GB",
             "cpu": "60GB"
         },
         offload_folder="./offload",
