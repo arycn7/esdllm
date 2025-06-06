@@ -48,7 +48,7 @@ else:
         model_id,
         device_map="auto",
         max_memory={
-            "cuda:0": "10GB",
+            "0": "10GB",
             "cpu": "60GB"
         },
         offload_folder="./offload",
