@@ -1,0 +1,8 @@
+bitsandbytes
+accelerate
+transformers
+huggingface_hub
+langchain_community
+markdown
+pymupdf4llm
+torch
