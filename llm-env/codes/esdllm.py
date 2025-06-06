@@ -1,5 +1,5 @@
 import os
-import torch  # moved up to do empty_cache early
+import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
 from huggingface_hub import login
 import pymupdf4llm
@@ -13,33 +13,35 @@ login(token="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")
 # Clear CUDA cache early to free GPU memory
 torch.cuda.empty_cache()
 
-print("")
+print("Available GPUs:", torch.cuda.device_count())  # Verify GPU count
 
 model_id = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Goes from codes/ to llm-env/
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 model_path = os.path.join(base_dir, "models", "llama_4_scout_model")
-
 os.makedirs(model_path, exist_ok=True)
 
-model_files_exist = os.path.exists(os.path.join(model_path, "config.json"))
+# Configure memory allocation for all GPUs
+num_gpus = torch.cuda.device_count()
+max_memory = {i: "10GB" for i in range(num_gpus)}
+max_memory["cpu"] = "60GB"
 
-if model_files_exist:
+quant_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_use_double_quant=True  # Reduces memory usage
+)
+
+if os.path.exists(os.path.join(model_path, "config.json")):
     print("🔁 Loading model from local storage...")
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
         device_map="auto",
-        max_memory={
-            0: "10GB",  # adjust if needed to slightly below total GPU VRAM
-            "cpu": "60GB"
-        },
-        offload_folder="./offload",  # folder for offloaded tensors
+        max_memory=max_memory,
+        offload_folder="./offload",
         torch_dtype=torch.float16,
-        quantization_config=BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16,
-        )
+        quantization_config=quant_config
     )
 else:
     print("⬇️ Downloading model from Hugging Face...")
@@ -47,21 +49,19 @@ else:
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map="auto",
-        max_memory={
-            0: "10GB",
-            "cpu": "60GB"
-        },
+        max_memory=max_memory,
         offload_folder="./offload",
         torch_dtype=torch.float16,
-        quantization_config=BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.float16,
-        )
+        quantization_config=quant_config
     )
     tokenizer.save_pretrained(model_path)
     model.save_pretrained(model_path)
     print("✅ Model saved to:", model_path)
+
+# Print device allocation
+print("Model device map:", model.hf_device_map)
+
+# ======== [REST OF YOUR CODE REMAINS UNCHANGED] ========
 
 # ======== Extract Markdown from PDF ========
 pdf_path = "3T. Core CE7T01.pdf"
