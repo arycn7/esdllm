@@ -14,10 +14,9 @@ login(token="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")
 torch.cuda.empty_cache()
 
 print("Available GPUs:", torch.cuda.device_count())  # Verify GPU count
-
-model_id = "meta-llama/Llama-4-Scout-17B-16E-Instruct"
+model_id = "upstage/SOLAR-10.7B-Instruct-v1.0"
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-model_path = os.path.join(base_dir, "models", "llama_4_scout_model")
+model_path = os.path.join(base_dir, "models", "SOLAR-10.7B-Instruct-v1.0")
 os.makedirs(model_path, exist_ok=True)
 
 # Configure memory allocation for all GPUs
