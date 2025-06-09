@@ -111,10 +111,11 @@ def build_synthesis_prompt(answers, context):
     [ROLE] ESD Certification Auditor
     [CONTEXT] {context}
     [ANALYSES] {answers}
-    [CRITERIA] Requires ≥2 categories with score ≥3
+    [CRITERIA] Requires ≥2 categories with score ≥3 
     [TASK] Final determination with RFC 2119-style justification
     [FORMAT] {{"decision": "Yes/No", "reason": "..."}}
     """
+    #this needs to be changed, categories definition is not clear
 
 # ======== Main Workflow ========
 def main():
@@ -173,7 +174,6 @@ def main():
     embedder = initialize_embedder()
     with open(CONTEXT_DOC_PATH) as f:
         context_text = f.read()
-    # For non-SDG context, use dynamic chunking
     with open(pedagogy_doc_path) as f:
         pedagogy_text = f.read()
     with open(competencies_doc_path) as f:
@@ -238,8 +238,11 @@ def main():
         print(results[section])
 
     # === Final Synthesis ===
-    synthesis_context = retrieve_context("ESD certification criteria", embedder, faiss_index, context_chunks)
-    final_prompt = build_synthesis_prompt(results, synthesis_context)
+    synthesis_context = retrieve_context("ESD certification criteria", embedder, faiss_index, context_chunks) #needs to be changed
+    final_prompt = build_synthesis_prompt(results, synthesis_context) #synthesis context needs to be changed
+    print("Final Prompt for Synthesis:")
+    print(final_prompt)
+    print("___")
     final_decision = pipe(final_prompt)
     
     print("Final Certification Decision:")
