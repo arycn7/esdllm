@@ -179,7 +179,6 @@ def main():
     with open(competencies_doc_path) as f:
         competencies_text = f.read()
 
-    faiss_index = create_faiss_index(context_chunks, embedder)
     pedagogy_chunks = text_splitter.split_text(pedagogy_text)
     competencies_chunks = text_splitter.split_text(competencies_text)
     pedagogy_index = create_faiss_index(pedagogy_chunks, embedder)
