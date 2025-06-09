@@ -36,10 +36,10 @@ def get_referenced_sdgs(module_data, pipe):
     [ROLE] ESD Assessment Expert
     [TASK] List ONLY SDG numbers (e.g., '4', '13') directly referenced in these module sections.
     [MODULE SECTIONS]
-    MLOs: {module_data['moduleLOs']}
-    Content: {module_data['modulecontent']}
-    T&L Methods: {module_data['modulecontent']}
-    Assessment: {module_data['moduleassesment']}
+    Module Learning Objectives: {module_data[3]}
+    Content: {module_data[2]}
+    Teaching & Learning Methods: {module_data[2]}  # Update if different field
+    Assessment: {module_data[4]}
     [INSTRUCTIONS] Return ONLY numbers separated by commas. If none, say 'None'.
     """
     response = pipe(prompt, max_new_tokens=50)[0]['generated_text']
@@ -52,10 +52,10 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     [ROLE] ESD Assessment Expert
     [INSTRUCTION] Answer strictly using module data and context. If no evidence exists, respond with "No evidence".
     [MODULE DATA]
-    MLOs: {module_data['moduleLOs']}
-    Content: {module_data['modulecontent']}
-    T&L Methods: {module_data['modulecontent']}
-    Assessment: {module_data['moduleassesment']}
+    Module Learning Objectives: {module_data[3]}
+    Content: {module_data[2]}
+    Teaching & Learning Methods: {module_data[2]}  # Update if different field
+    Assessment: {module_data[4]}
     
     [CONTEXT] {context}
     
@@ -89,10 +89,10 @@ def build_section_prompt(section_name, module_data, context):
     [ROLE] ESD Assessment Expert
     [INSTRUCTION] Answer strictly using module data and context. If no evidence exists, respond with "No evidence".
     [MODULE DATA]
-    MLOs: {module_data['moduleLOs']}
-    Content: {module_data['modulecontent']}
-    T&L Methods: {module_data['modulecontent']}  # Update if different field
-    Assessment: {module_data['moduleassesment']}
+    Module Learning Objectives: {module_data[3]}
+    Content: {module_data[2]}
+    Teaching & Learning Methods: {module_data[2]}  # Update if different field
+    Assessment: {module_data[4]}
     
     [CONTEXT] {context}
     
