@@ -6,3 +6,4 @@ langchain_community
 markdown
 pymupdf4llm
 torch
+faiss-gpu
