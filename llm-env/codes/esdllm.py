@@ -5,6 +5,9 @@ import re
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
 from huggingface_hub import login
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+
 from sentence_transformers import SentenceTransformer
 from helpers import parse_and_extract, dynamic_chunk_splitter  # Ensure these exist
 import pymupdf4llm  # Ensure this is installed
@@ -169,7 +172,8 @@ def main():
     with open(CONTEXT_DOC_PATH) as f:
         context_text = f.read()
     # For non-SDG context, use dynamic chunking
-    context_chunks = dynamic_chunk_splitter(context_text, chunk_size=500)
+    context_chunks = text_splitter.split_text(context_text)
+
     faiss_index = create_faiss_index(context_chunks, embedder)
 
     # Process module document
