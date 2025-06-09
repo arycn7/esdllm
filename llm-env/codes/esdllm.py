@@ -1,6 +1,6 @@
 import os
 import torch
-import faiss
+!pip install -qU langchain-community faiss-gpu
 import re
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
