@@ -790,7 +790,7 @@ refers to Kolb’s theory of the experiential learning
 cycle with the following stages: 1. Having a concrete 
 experience, 2. Observing and reflecting, 3. Forming 
 abstract concepts for generalization and 4. Applying them 
-in new situations (Kolb, 1984). Action-learning increases 
+in new situations. Action-learning increases 
 knowledge acquisition, competency development and 
 values clarification by linking abstract concepts to personal 
 experience and the learner’s life. The role of the educator 
@@ -801,11 +801,10 @@ experiences and reflexive thought processes.
 and principles, rather than by any concrete teaching 
 or learning strategy. It aims at empowering learners to 
 question and change the ways they see and think about the 
-world in order to deepen their understanding of it (Slavich 
-and Zimbardo, 2012; Mezirow, 2000). The educator is a 
+world in order to deepen their understanding of it. The educator is a 
 facilitator who empowers and challenges learners to alter 
 their worldviews. The related concept of transgressive 
-learning (Lotz-Sisitka et al., 2015) goes one step further: It 
+learning goes one step further: It 
 underlines that learning in ESD has to overcome the status 
 quo and prepare the learner for disruptive thinking and the 
 co-creation of new knowledge

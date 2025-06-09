@@ -43,6 +43,7 @@ def get_referenced_sdgs(module_data, pipe):
     [INSTRUCTIONS] Return ONLY numbers separated by commas. If none, say 'None'.
     """
     response = pipe(prompt, max_new_tokens=50)[0]['generated_text']
+    print("SDG References Response:", response) # Debugging output
     return re.findall(r'\d+', response)
 
 def build_sdg_prompt(module_data, sdg_descriptions):
@@ -97,7 +98,7 @@ def build_section_prompt(section_name, module_data, context):
     [CONTEXT] {context}
     
     [TASK] Analyze for {section_name}:
-    1. Direct references? (Yes/No per section)
+    1. Direct references? (Yes/No)
     2. Embedding rating (0-4)
     3. Competency links (Explicit/Implicit/None)
     [FORMAT] JSON
@@ -206,7 +207,8 @@ def main():
         results["SDG"] = sdg_response[0]['generated_text']
     else:
         results["SDG"] = '{"sdg_coverage": "No evidence"}'
-
+    print("SDG Analysis Result:")
+    print(results["SDG"])
     # === Other Sections (Competencies, Pedagogy) ===
     analysis_sections = {
         "Competencies": "ESD competency framework",
