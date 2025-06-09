@@ -17,7 +17,8 @@ MODEL_ID = "upstage/SOLAR-10.7B-Instruct-v1.0"
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 CONTEXT_DOC_PATH = "esd_context.txt"  # Your large context document
 PDF_PATH = "3T. Core CE7T01.pdf"
-
+pedagogy_doc_path = "pedagogy.txt"  # Path to pedagogy document
+competencies_doc_path = "competencies.txt"  # Path to competencies document
 # ======== Helper Functions ========
 def smart_chunk_sdg_descriptions(context_text):
     """Split context document into individual SDG chunks"""
@@ -78,7 +79,7 @@ def create_faiss_index(chunks, embedder):
     index.add(embeddings)
     return index
 
-def retrieve_context(query, embedder, index, chunks, k=3):
+def retrieve_context(query, embedder, index, chunks, k=4):
     """Retrieve relevant context chunks"""
     query_embedding = embedder.encode([query])
     distances, indices = index.search(query_embedding, k)
@@ -173,10 +174,17 @@ def main():
     with open(CONTEXT_DOC_PATH) as f:
         context_text = f.read()
     # For non-SDG context, use dynamic chunking
-    context_chunks = text_splitter.split_text(context_text)
+    with open(pedagogy_doc_path) as f:
+        pedagogy_text = f.read()
+    with open(competencies_doc_path) as f:
+        competencies_text = f.read()
 
     faiss_index = create_faiss_index(context_chunks, embedder)
-
+    pedagogy_chunks = text_splitter.split_text(pedagogy_text)
+    competencies_chunks = text_splitter.split_text(competencies_text)
+    pedagogy_index = create_faiss_index(pedagogy_chunks, embedder)
+    competencies_index = create_faiss_index(competencies_chunks, embedder)
+    
     # Process module document
     md_text = pymupdf4llm.to_markdown(PDF_PATH)
     module_data = parse_and_extract(md_text)
@@ -215,6 +223,12 @@ def main():
         "Pedagogy": "ESD pedagogical approaches"
     }
     for section, query in analysis_sections.items():
+        if section == "Competencies":
+            context_chunks = competencies_chunks
+            faiss_index = competencies_index    
+        else:
+            context_chunks = pedagogy_chunks
+            faiss_index = pedagogy_index
         context = retrieve_context(query, embedder, faiss_index, context_chunks)
         print(f"Retrieved context for {section}: {context}")
          # Build and run the prompt for each section
