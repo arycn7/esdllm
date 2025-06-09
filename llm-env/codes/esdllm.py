@@ -217,6 +217,8 @@ def main():
         prompt = build_section_prompt(section, module_data, context)
         response = pipe(prompt)
         results[section] = response[0]['generated_text']
+        print(f"{section} Analysis Result:")
+        print(results[section])
 
     # === Final Synthesis ===
     synthesis_context = retrieve_context("ESD certification criteria", embedder, faiss_index, context_chunks)
