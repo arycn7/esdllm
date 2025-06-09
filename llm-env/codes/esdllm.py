@@ -216,6 +216,8 @@ def main():
     }
     for section, query in analysis_sections.items():
         context = retrieve_context(query, embedder, faiss_index, context_chunks)
+        print(f"Retrieved context for {section}: {context}")
+         # Build and run the prompt for each section
         prompt = build_section_prompt(section, module_data, context)
         response = pipe(prompt)
         results[section] = response[0]['generated_text']
