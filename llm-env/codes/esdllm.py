@@ -5,8 +5,8 @@ import re
 import numpy as np
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
 from huggingface_hub import login
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+from langchain.text_splitter import CharacterTextSplitter
+text_splitter = CharacterTextSplitter(chunk_size=900, chunk_overlap=50)
 
 from sentence_transformers import SentenceTransformer
 from helpers import parse_and_extract, dynamic_chunk_splitter  # Ensure these exist
@@ -179,8 +179,8 @@ def main():
     with open(competencies_doc_path) as f:
         competencies_text = f.read()
 
-    pedagogy_chunks = pedagogy_text
-    competencies_chunks = competencies_text
+    pedagogy_chunks = text_splitter.split_text(pedagogy_text)
+    competencies_chunks = text_splitter.split_text(competencies_text)
     pedagogy_index = create_faiss_index(pedagogy_chunks, embedder)
     competencies_index = create_faiss_index(competencies_chunks, embedder)
     
