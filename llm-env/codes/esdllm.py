@@ -62,8 +62,8 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     
     [CONTEXT] {context}
     
-    [TASK] Analyze SDG coverage:
-    1. Check if each SDG from the context is embedded in the university Module. If atleast 3 learning objectives out of the 15 are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
+    [TASK] For each Suggested SDG from CONTEXT answer the followinf:
+    1. Is the SDG embedded in the module? If atleast 3 learning objectives out of the 15 for the Specific SDG are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
     2. How embedded are the referenced SDGs? (Rate 1-4)
     
     [FORMAT] JSON
