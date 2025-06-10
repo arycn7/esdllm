@@ -199,9 +199,9 @@ def main():
         top_p=1.0,
         top_k=0,
         repetition_penalty=1.1,
-        return_full_text=False
-        do_sample=False,
-    )
+        return_full_text=False,
+        do_sample=False
+        )
 
     # Initialize results
     results = {}
