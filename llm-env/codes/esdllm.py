@@ -53,7 +53,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     print("sdg descriptions:", context)  # Debugging output
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. The SDGs and their descriptions are found in the context field. If atleast one learning objective out of the 15 are somewhat implied in the module content, the SDG is considered embedded.
+    [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. you need to complete the tasks provided and respond as outlined in the task field and format field.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -199,8 +199,7 @@ def main():
         top_p=1.0,
         top_k=0,
         repetition_penalty=1.1,
-        return_full_text=False,
-        do_sample=False
+        return_full_text=False
         )
 
     # Initialize results
