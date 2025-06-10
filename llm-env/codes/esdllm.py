@@ -35,7 +35,7 @@ def get_referenced_sdgs(module_data, pipe):
     """Identify which SDGs are referenced in the module"""
     prompt = f"""
     [ROLE] ESD Assessment Expert
-    [TASK] List ONLY SDG numbers (e.g., '4', '13') somewhat referenced in these module sections.
+    [TASK] List ONLY SDG numbers (e.g., '4', '13') somewhat indirectly referenced in these module sections.
     [MODULE SECTIONS]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -53,7 +53,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     print("sdg descriptions:", context)  # Debugging output
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] Answer strictly using module data and SDG Descriptions context. If atleast two learning objectives are met, the SDG is considered embedded.
+    [INSTRUCTION] Answer strictly using module data and SDG Descriptions context. If atleast two learning objectives of any kind are met, the SDG is considered embedded.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
