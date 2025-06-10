@@ -195,10 +195,12 @@ def main():
         model=model,
         tokenizer=tokenizer,
         max_new_tokens=400, #might need to increase this, competencies analysis results are being cut off
-        temperature=0.3,  # Lower for reduced hallucination
-        top_p=0.9,
+        temperature=0.1,  # Lower for reduced hallucination
+        top_p=1.0,
+        top_k=0,
         repetition_penalty=1.1,
         return_full_text=False
+        do_sample=False,
     )
 
     # Initialize results
