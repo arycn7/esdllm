@@ -110,9 +110,11 @@ def build_section_prompt(section_name, module_data, context):
 
 def build_synthesis_prompt(answers, context):
     """Final decision prompt with scoring thresholds"""
+    Instructions=""" You need to determine if the module meets the ESD certification criteria based on the provided analyses. Criteria: if atleast one of (SDGs 8,9,10 or 12) AND atleast one of (SDGs 1,11,16,7,3,4,5,2) AND atleast one of (SDGs 13,14,15,6) AND atleast one Competency AND atleast one Pedagogical approach are embedded in the module, then the module is considered ESD certified. If not, it is not certified.
+    """
     return f"""
     [ROLE] ESD Certification Auditor
-    [CONTEXT] {context}
+    [INSTRUCTIONS] {Instructions}
     [ANALYSES] {answers}
     [CRITERIA] Requires ≥2 categories with score ≥3 
     [TASK] Final determination with RFC 2119-style justification
