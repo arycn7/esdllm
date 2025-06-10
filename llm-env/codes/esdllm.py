@@ -53,7 +53,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     print("sdg descriptions:", context)  # Debugging output
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] Answer strictly using module data and SDG Descriptions context. If atleast one learning objective out of the 15 are implied in the module content, the SDG is considered embedded.
+    [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. The SDGs and their descriptions are found in the context field. If atleast one learning objective out of the 15 are somewhat implied in the module content, the SDG is considered embedded.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -63,7 +63,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     [CONTEXT] {context}
     
     [TASK] Analyze SDG coverage:
-    1. Check if the SDG's from the context is actually referenced in the module data based on the suggested SDG descriptions from the context.If atleast two learning objectives are met, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
+    1. Check if the SDG's from the context is actually referenced in the module data based on the suggested SDG descriptions from the context.If atleast one learning objective out of the 15 are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
     2. How embedded are the referenced SDGs? (Rate 1-4)
     
     [FORMAT] JSON
