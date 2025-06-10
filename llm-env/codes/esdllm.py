@@ -35,7 +35,7 @@ def get_referenced_sdgs(module_data, pipe):
     """Identify which SDGs are referenced in the module"""
     prompt = f"""
     [ROLE] ESD Assessment Expert
-    [TASK] List ONLY SDG numbers (e.g., '4', '13') directly referenced in these module sections.
+    [TASK] List ONLY SDG numbers (e.g., '4', '13') somewhat referenced in these module sections.
     [MODULE SECTIONS]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -50,9 +50,10 @@ def get_referenced_sdgs(module_data, pipe):
 def build_sdg_prompt(module_data, sdg_descriptions):
     """Build SDG-specific prompt with full descriptions"""
     context = "\n\n".join(sdg_descriptions)
+    print("sdg descriptions:", context)  # Debugging output
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] Answer strictly using module data and context. If no evidence exists, respond with "No evidence".
+    [INSTRUCTION] Answer strictly using module data and SDG Descriptions context. If no evidence exists, respond with "No evidence".
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -62,8 +63,9 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     [CONTEXT] {context}
     
     [TASK] Analyze SDG coverage:
-    1. Are there direct SDG references in each section? (Yes/No per section)
-    2. How embedded are SDGs in each section? (Rate 1-4)
+    1. Check if the SDG's from the context is actually referenced in the module data based on the suggested SDG descriptions from the context. (Return The referenced SDG numbers separated by commas)
+    2. How embedded are the referenced SDGs? (Rate 1-4)
+    
     [FORMAT] JSON
     """
 
@@ -101,9 +103,10 @@ def build_section_prompt(section_name, module_data, context):
     [TASK] Analyze for {section_name}:
     1. Direct references? (Yes/No)
     2. Embedding rating (0-4)
-    3. Competency links (Explicit/Implicit/None)
+    3. Competency links (Explicit/Implicit/None) 
     [FORMAT] JSON
     """
+    #redundant, q3
 
 def build_synthesis_prompt(answers, context):
     """Final decision prompt with scoring thresholds"""
@@ -184,17 +187,15 @@ def main():
     pedagogy_index = create_faiss_index(pedagogy_chunks, embedder)
     competencies_index = create_faiss_index(competencies_chunks, embedder)
     
-    # Process module document
     md_text = pymupdf4llm.to_markdown(PDF_PATH)
     module_data = parse_and_extract(md_text)
 
-    # Define pipeline (ONCE)
     pipe = pipeline(
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=300,
-        temperature=0.2,  # Lower for reduced hallucination
+        max_new_tokens=400, #might need to increase this, competencies analysis results are being cut off
+        temperature=0.3,  # Lower for reduced hallucination
         top_p=0.9,
         repetition_penalty=1.1,
         return_full_text=False
