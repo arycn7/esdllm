@@ -200,6 +200,7 @@ def main():
         temperature=0.0,  # Lower for reduced hallucination
         top_p=None,
         top_k=None,
+        max_length=8192,
         repetition_penalty=1.1,
         return_full_text=False,
          do_sample=False 
