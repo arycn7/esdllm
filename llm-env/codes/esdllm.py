@@ -35,7 +35,7 @@ def get_referenced_sdgs(module_data, pipe):
     """Identify which SDGs are referenced in the module"""
     prompt = f"""
     [ROLE] UN SDG Assessment Expert
-    [TASK] List the top/ closest 6 UN SUSTAINABLE GOALS numbers (e.g., '4', '13') that may be embedded in the teaching of this module, you can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines.
+    [TASK] List the top 6 UN SUSTAINABLE GOALS numbers (e.g., '4', '13') that may be embedded in the teaching of this module, you can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines. Return ONLY recognized SDG numbers separated by commas. If none, say 'None'.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -63,7 +63,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     [CONTEXT] {context}
     
     [TASK] Analyze SDG coverage:
-    1. Check if each SDG from the context is actually referenced in the module data based on the suggested SDG descriptions from the context.If atleast 3 learning objective out of the 15 are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
+    1. Check if each SDG from the context is embedded in the university Module. If atleast 3 learning objectives out of the 15 are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
     2. How embedded are the referenced SDGs? (Rate 1-4)
     
     [FORMAT] JSON
