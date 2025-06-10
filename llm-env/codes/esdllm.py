@@ -34,9 +34,9 @@ def smart_chunk_sdg_descriptions(context_text):
 def get_referenced_sdgs(module_data, pipe):
     """Identify which SDGs are referenced in the module"""
     prompt = f"""
-    [ROLE] ESD Assessment Expert
-    [TASK] List ONLY SDG numbers (e.g., '4', '13') somewhat indirectly referenced in these module sections.
-    [MODULE SECTIONS]
+    [ROLE] UN SDG Assessment Expert
+    [TASK] List ONLY SDG numbers (e.g., '4', '13') that may be embedded in the teaching of this module, you can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines.
+    [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
     Teaching & Learning Methods: {module_data[2]}  # Update if different field
@@ -53,7 +53,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     print("sdg descriptions:", context)  # Debugging output
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] Answer strictly using module data and SDG Descriptions context. If atleast two learning objectives of any kind are met, the SDG is considered embedded.
+    [INSTRUCTION] Answer strictly using module data and SDG Descriptions context. If atleast one learning objective out of the 15 are implied in the module content, the SDG is considered embedded.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
