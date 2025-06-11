@@ -62,11 +62,10 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     
     [CONTEXT] {context}
     
-    [TASK] For each Suggested SDG from CONTEXT answer the followinf:
-    1. Is the SDG embedded in the module? If atleast 3 learning objectives out of the 15 for the Specific SDG are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
-    2. How embedded are the referenced SDGs? (Rate 1-4)
+    [TASK] For each Suggested SDG from CONTEXT, separately answer the following:
+    1. Is the SDG embedded in the module? If atleast 3 learning objectives out of the 15 for the Specific SDG are somewhat implied in the module content, the SDG is considered embedded. (Return "Yes" or "No")
     
-    [FORMAT] JSON
+    [FORMAT] JSON with each provided SDG and its embedding status as a key-value pair
     """
 
 def initialize_embedder():
