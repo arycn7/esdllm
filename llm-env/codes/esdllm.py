@@ -32,58 +32,42 @@ def smart_chunk_sdg_descriptions(context_text):
     return sdg_chunks
 
 def get_referenced_sdgs(module_data, pipe):
-    prompt = f"""You are analyzing a university module to find the MOST RELEVANT UN SDGs to the best of your knowledge of the UN Sustainable development goals
+    """Identify which SDGs are referenced in the module"""
+    prompt = f"""
+    [ROLE] UN SDG Assessment Expert
+    [TASK] List the top 5  UN SUSTAINABLE GOALS numbers (e.g., '4', '13') that may be embedded in the teaching of this module in order of highest embedding to lowest, it does not need to be in numerical order. You can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines. Return ONLY recognized SDG numbers separated by commas. If none, say 'None'. List in order of relevance.
+    [MODULE DATA]
+    Module Learning Objectives: {module_data[3]}
+    Content: {module_data[2]}
+    Teaching & Learning Methods: {module_data[2]}  # Update if different field
+    Assessment: {module_data[4]}
+    [INSTRUCTIONS] List in order of relevance, Return ONLY numbers separated by commas. If none, say 'None'.
+    """
+    response = pipe(prompt, max_new_tokens=50)[0]['generated_text']
+    print("SDG References Response:", response) # Debugging output
+    return re.findall(r'\d+', response)
 
-MODULE DETAILS:
-Title: {module_data[0]}
-Learning Objectives: {module_data[3]}
-Content: {module_data[2]}
-Assessment: {module_data[4]}
-
-OUTPUT Instructions: Only return a list of 5 relevant SDG numbers separated by commas (most relevant first). Do not include any text or explanations, just the numbers.
-EXAMPLE: 4, 9, 8, 17, 13
-
-ANSWER:"""
-
-    response = pipe(prompt, max_new_tokens=100)[0]['generated_text']
-    print("SDG References Response:", response)
-    numbers = re.findall(r'\b([1-9]|1[0-7])\b', response)
-    return numbers[:5]
-
- 
 def build_sdg_prompt(module_data, sdg_descriptions):
-    # Build individual SDG entries
-    sdg_entries = []
-    for desc in sdg_descriptions:
-        sdg_match = re.search(r'SDG (\d+):', desc)
-        if sdg_match:
-            sdg_num = sdg_match.group(1)
-            sdg_name = desc.split(':')[1].split('\n')[0].strip()
-            sdg_entries.append(f"SDG {sdg_num}: {sdg_name}")
+    """Build SDG-specific prompt with full descriptions"""
+    context = "\n\n".join(sdg_descriptions)
+    print("sdg descriptions:", context)  # Debugging output
+    return f"""
+    [ROLE] ESD Assessment Expert
+    [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. you need to complete the tasks provided and respond as outlined in the task field and format field.
+    [MODULE DATA]
+    Module Learning Objectives: {module_data[3]}
+    Content: {module_data[2]}
+    Teaching & Learning Methods: {module_data[2]}  # Update if different field
+    Assessment: {module_data[4]}
     
-    return f"""Analyze each SDG below for this university module:
-
-MODULE:
-Learning Objectives: {module_data[3]}
-Content: {module_data[2]}
-
-ANALYZE THESE SDGs:
-{chr(10).join(sdg_entries)}
-
-For each SDG listed above, determine if it's embedded in the module.
-
-EXAMPLE OF OUTPUT FORMAT - JSON array with ALL SDGs listed above:
-[
-  {{"SDG_NUMBER": 4, "SDG_NAME": "Quality Education", "EMBEDDED": "Yes"}},
-  {{"SDG_NUMBER": 8, "SDG_NAME": "Decent Work", "EMBEDDED": "No"}},
-  {{"SDG_NUMBER": 13, "SDG_NAME": "Climate Action", "EMBEDDED": "Yes"}},
-  {{"SDG_NUMBER": 9, "SDG_NAME": "Industry Innovation", "EMBEDDED": "No"}},
-  {{"SDG_NUMBER": 17, "SDG_NAME": "Partnerships", "EMBEDDED": "Yes"}}
-]
-
-JSON OUTPUT:"""
-
-
+    [CONTEXT] {context}
+    
+    [TASK] For each Suggested SDG from CONTEXT answer the followinf:
+    1. Is the SDG embedded in the module? If atleast 3 learning objectives out of the 15 for the Specific SDG are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
+    2. How embedded are the referenced SDGs? (Rate 1-4)
+    
+    [FORMAT] JSON
+    """
 
 def initialize_embedder():
     """Initialize sentence transformer embedder"""
@@ -104,133 +88,77 @@ def retrieve_context(query, embedder, index, chunks, k=4):
     return [chunks[i] for i in indices[0]]
 
 def build_section_prompt(section_name, module_data, context):
-    if section_name == "Competencies":
-        # Extract individual competencies from context
-        competency_list = []
-        for ctx in context:
-            competencies = re.findall(r'([A-Z][^:]*competency): ([^.]*\.)', ctx)
-            competency_list.extend(competencies)
-        
-        competency_text = "\n".join([f"- {name}: {desc}" for name, desc in competency_list[:6]])
-        
-        return f"""Analyze this university module for ESD competencies:
-
-MODULE:
-Learning Objectives: {module_data[3]}
-Content: {module_data[2]}
-Assessment: {module_data[4]}
-
-ESD COMPETENCIES TO CHECK:
-{competency_text}
-
-TASK: For each competency above, determine if the module develops it.
-
-OUTPUT FORMAT:
-{{
-    "competencies_found": [
-        {{"name": "Systems thinking competency", "present": "Yes", "evidence": "Module covers complex systems"}},
-        {{"name": "Critical thinking competency", "present": "No", "evidence": "No evidence found"}}
-    ],
-    "overall_rating": 3
-}}
-
-JSON OUTPUT:"""
+    """Generate structured prompts for each analysis section"""
+    return f"""
+    [ROLE] ESD Assessment Expert
+    [INSTRUCTION] Answer strictly using module data and context. If no evidence exists, respond with "No evidence".
+    [MODULE DATA]
+    Module Learning Objectives: {module_data[3]}
+    Content: {module_data[2]}
+    Teaching & Learning Methods: {module_data[2]}  # Update if different field
+    Assessment: {module_data[4]}
     
-    else:  # Pedagogy
-        return f"""Analyze this university module for ESD pedagogical approaches:
-
-MODULE:
-Learning Objectives: {module_data[3]}
-Content: {module_data[2]}
-Assessment: {module_data[4]}
-
-PEDAGOGICAL APPROACHES TO CHECK:
-{chr(10).join(context)}
-
-TASK: Identify which pedagogical approaches are used in this module.
-
-OUTPUT FORMAT:
-{{
-    "approaches_found": [
-        {{"name": "Learner-centred approach", "present": "Yes", "evidence": "Students construct knowledge"}},
-        {{"name": "Action-oriented learning", "present": "No", "evidence": "No practical projects"}}
-    ],
-    "overall_assessment": "Module uses some ESD pedagogical approaches"
-}}
-
-JSON OUTPUT:"""
-
+    [CONTEXT] {context}
+    
+    [TASK] Analyze for {section_name}:
+    1. Direct references? (Yes/No)
+    2. Embedding rating (0-4)
+    3. Competency links (Explicit/Implicit/None) 
+    [FORMAT] JSON
+    """
+    #redundant, q3
 
 def build_synthesis_prompt(answers, context):
-    return f"""You are an ESD certification auditor making the final decision.
-
-ANALYSIS RESULTS:
-{str(answers)}
-
-CERTIFICATION CRITERIA:
-- Must have at least one SDG from economic category (8,9,10,12) 
-- Must have at least one SDG from social category (1,2,3,4,5,11,16)
-- Must have at least one SDG from environmental category (6,7,13,14,15)
-- Must show competency development evidence
-- Must show pedagogical approach evidence
-
-DECISION TASK:
-Based on the analyses above, does this module meet ESD certification criteria?
-
-REQUIRED JSON OUTPUT:
-{{
-    "decision": "Yes",
-    "reason": "Module meets criteria with embedded SDGs and competency evidence"
-}}
-
-RULES:
-- decision: "Yes" or "No" only
-- reason: maximum 20 words explaining decision
-
-JSON RESPONSE:"""
-
-def extract_valid_json(response_text):
-    """Extract valid JSON from model response"""
-    # Try to find JSON patterns
-    patterns = [
-        r'\[[\s\S]*?\]',  # Array
-        r'\{[\s\S]*?\}'   # Object
-    ]
-    
-    for pattern in patterns:
-        matches = re.findall(pattern, response_text)
-        for match in matches:
-            try:
-                # Test if it's valid JSON
-                import json
-                json.loads(match)
-                return match
-            except:
-                continue
-    
-    # If no valid JSON found, return the response
-    return response_text.strip()
-
+    """Final decision prompt with scoring thresholds"""
+    Instructions=""" You need to determine if the module meets the ESD certification criteria based on the provided analyses. Criteria: if atleast one of (SDGs 8,9,10 or 12) AND atleast one of (SDGs 1,11,16,7,3,4,5,2) AND atleast one of (SDGs 13,14,15,6) AND atleast one Competency AND atleast one Pedagogical approach are embedded in the module, then the module is considered ESD certified. If not, it is not certified.
+    """
+    return f"""
+    [ROLE] ESD Certification Auditor
+    [INSTRUCTIONS] {Instructions}
+    [ANALYSES] {answers}
+    [CRITERIA] Requires ≥2 categories with score ≥3 
+    [TASK] Final determination with RFC 2119-style justification
+    [FORMAT] {{"decision": "Yes/No", "reason": "..."}}
+    """
+    #this needs to be changed, categories definition is not clear
 
 # ======== Main Workflow ========
 def main():
+    # Initialize hardware
+    login(token="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")
     torch.cuda.empty_cache()
-    print("Available GPUs:", torch.cuda.device_count())
 
-    # Model path (already stored locally)
-    model_path = "/home/support/llm/Mistral-7B-v0.3"
+    print("Available GPUs:", torch.cuda.device_count())  # Verify GPU count
+   
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    model_path = os.path.join(base_dir, "models", "SOLAR-10.7B-Instruct-v1.0")
+    os.makedirs(model_path, exist_ok=True)
 
-    # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    # Configure memory allocation for all GPUs
 
-    # Load model in full FP16, no quantization
-    model = AutoModelForCausalLM.from_pretrained(
-        model_path,
-        device_map={"": 0},           # Fully load on GPU 0
-        torch_dtype=torch.float16,    # Use FP16
-        offload_folder=None
-    )
-    print("Model loaded successfully.")
+
+    if os.path.exists(os.path.join(model_path, "config.json")):
+        print("Loading model from local storage...")
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            device_map=={"": 0},
+            offload_folder=None,
+            torch_dtype=torch.float16
+        )
+    else:
+        print("Downloading model from Hugging Face...")
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            device_map=={"": 0},
+            offload_folder=None,
+            torch_dtype=torch.float16
+        )
+        tokenizer.save_pretrained(model_path)
+        model.save_pretrained(model_path)
+        print("Model saved to:", model_path)
+
     # Print device allocation
     print("Model device map:", model.hf_device_map)
 
@@ -250,21 +178,20 @@ def main():
     
     md_text = pymupdf4llm.to_markdown(PDF_PATH)
     module_data = parse_and_extract(md_text)
+
     pipe = pipeline(
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=100,
-        temperature=0.1,        # Very low but not 0 - allows minimal variance
-        top_p=0.6,             # More constrained than 0.9
-        do_sample=True,        # Enable sampling but constrained
-        pad_token_id=tokenizer.eos_token_id,
+        max_new_tokens=400, #might need to increase this, competencies analysis results are being cut off
+        temperature=0.0,  # Lower for reduced hallucination
+        top_p=None,
+        top_k=None,
+        max_length=8192,
+        repetition_penalty=1.1,
         return_full_text=False,
-        repetition_penalty=1.1
-                      
-    )
-
-
+         do_sample=False 
+        )
 
     # Initialize results
     results = {}
@@ -277,9 +204,7 @@ def main():
     if sdg_descriptions:
         sdg_prompt = build_sdg_prompt(module_data, sdg_descriptions)
         sdg_response = pipe(sdg_prompt)
-        cleaned_result = extract_valid_json(sdg_response[0]['generated_text'])
-
-        results["SDG"] = cleaned_result
+        results["SDG"] = sdg_response[0]['generated_text']
     else:
         results["SDG"] = '{"sdg_coverage": "No evidence"}'
     print("SDG Analysis Result:")
@@ -301,8 +226,7 @@ def main():
          # Build and run the prompt for each section
         prompt = build_section_prompt(section, module_data, context)
         response = pipe(prompt)
-        cleaned_response = extract_valid_json(response[0]['generated_text'])
-        results[section] = cleaned_response
+        results[section] = response[0]['generated_text']
         print(f"{section} Analysis Result:")
         print(results[section])
 
