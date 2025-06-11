@@ -52,56 +52,32 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     context = "\n\n".join(sdg_descriptions)
    
     return f"""
-[ROLE] ESD Assessment Expert
+You are an SDG Assessment Expert.
 
-[INSTRUCTION] You are an expert at evaluating university modules for their embedding of Sustainable Development Goals (SDGs). You have been provided with SDGs and their descriptions (in CONTEXT) and a university module (in MODULE DATA). You will analyze each SDG according to the steps in TASK and output your result strictly in JSON format as described.
+You are given:
+- Module Learning Objectives: {module_data[3]}
+- Module Content: {module_data[2]}
+- Module Assessment: {module_data[4]}
+- SDG Data: {context}
 
-[MODULE DATA]
-Module Learning Objectives: {module_data[3]}
-Content: {module_data[2]}
-Teaching & Learning Methods: {module_data[2]}
-Assessment: {module_data[4]}
+TASK:
+For each SDG, decide if it is embedded in the module.
 
-[CONTEXT]
-{context}
+RULES:
+- An SDG is embedded if at least 3 of its 15 learning objectives are somewhat implied by the module.
+- If embedded, give a rating from 1 (weak) to 4 (very strong).
+- If not embedded, write "No evidence" and leave rating blank.
 
-[TASK]
-For each Suggested SDG in CONTEXT:
-
-1. Retrieve the 15 learning objectives for that SDG.
-2. Compare these 15 objectives to the MODULE DATA provided.
-3. Count how many of the 15 learning objectives are somewhat implied or addressed.
-4. If at least 3 learning objectives are implied, consider the SDG embedded; otherwise state "No evidence".
-5. If embedded, rate the embedding strength on a scale from 1 to 4, where:
-   - 1 = weak embedding
-   - 2 = moderate embedding
-   - 3 = strong embedding
-   - 4 = very strong embedding
-6. Use your best judgment based on alignment, relevance, and depth.
-
-[THINKING] You must work step-by-step. First extract SDG learning objectives, then perform comparison, then make a decision, and finally generate the JSON.
-
-[EXAMPLE OUTPUT FORMAT]
+FORMAT (strict JSON array, no explanations):
 
 [
   {{
-    "SDG_NUMBER": 4,
-    "SDG_NAME": "Quality Education",
-    "EMBEDDED": 4,
-    "RATING": 3
-  }},
-  {{
-    "SDG_NUMBER": 7,
-    "SDG_NAME": "Affordable and Clean Energy",
-    "EMBEDDED": "No evidence",
-    "RATING": ""
+    "SDG_NUMBER": <number>,
+    "SDG_NAME": "<name>",
+    "EMBEDDED": "<number or 'No evidence'>",
+    "RATING": "<rating or empty>"
   }}
 ]
-
-[IMPORTANT]
-- Only output the JSON array. Do not explain your reasoning.
-- Do not include placeholders like "<SDG Number>".
-- Only include actual results.
 """
 
 
