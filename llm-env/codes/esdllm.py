@@ -230,7 +230,7 @@ def main():
     print("Available GPUs:", torch.cuda.device_count())
 
     # Model path (already stored locally)
-    model_path = "/home/support/llm/Llama-3.1-8B"
+    model_path = "/home/support/llm/DeepSeek-R1-Distill-Llama-70B"
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -268,7 +268,7 @@ def main():
         tokenizer=tokenizer,
         max_new_tokens=100,
         temperature=0.1,        # Very low but not 0 - allows minimal variance
-        top_p=0.7,             # More constrained than 0.9
+        top_p=0.6,             # More constrained than 0.9
         do_sample=True,        # Enable sampling but constrained
         pad_token_id=tokenizer.eos_token_id,
         return_full_text=False,
