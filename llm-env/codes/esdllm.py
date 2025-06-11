@@ -40,7 +40,7 @@ Learning Objectives: {module_data[3]}
 Content: {module_data[2]}
 Assessment: {module_data[4]}
 
-OUTPUT FORMAT: Only return 5 SDG numbers separated by commas (most relevant first)
+OUTPUT Instructions: Only return a list of 5 relevant SDG numbers separated by commas (most relevant first). Do not include any text or explanations, just the numbers.
 EXAMPLE: 4, 9, 8, 17, 13
 
 ANSWER:"""
