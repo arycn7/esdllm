@@ -32,62 +32,69 @@ def smart_chunk_sdg_descriptions(context_text):
     return sdg_chunks
 
 def get_referenced_sdgs(module_data, pipe):
-    prompt = f"""You are an SDG classification expert. Your task is to identify UN Sustainable Development Goal numbers that relate to this university module.
+    prompt = f"""You are analyzing a university module to find the MOST RELEVANT UN SDGs.
 
-MODULE CONTENT:
+MODULE DETAILS:
+Title: {module_data[0]}
 Learning Objectives: {module_data[3]}
 Content: {module_data[2]}
 Assessment: {module_data[4]}
 
-TASK: Return exactly 5 SDG numbers (1-17) that best relate to this module, in order of relevance.
+UN SDGs (pick the 5 most relevant):
+1-No Poverty, 2-Zero Hunger, 3-Good Health, 4-Quality Education, 5-Gender Equality, 
+6-Clean Water, 7-Affordable Energy, 8-Decent Work, 9-Industry Innovation, 
+10-Reduced Inequalities, 11-Sustainable Cities, 12-Responsible Consumption, 
+13-Climate Action, 14-Life Below Water, 15-Life on Land, 16-Peace Justice, 17-Partnerships
 
-RESPONSE FORMAT: Only numbers separated by commas
-EXAMPLE: 4, 8, 13, 9, 17
+Think about:
+- What field is this module in?
+- What skills does it teach?
+- What topics does it cover?
+- How could it impact society?
 
-RESPONSE:"""
+OUTPUT: Just 5 numbers separated by commas (most relevant first)
+EXAMPLE: 4, 9, 8, 17, 13
 
-    response = pipe(prompt, max_new_tokens=30)[0]['generated_text']
+ANSWER:"""
+
+    response = pipe(prompt, max_new_tokens=50)[0]['generated_text']
     print("SDG References Response:", response)
-    # Extract only the numbers from the response
-    numbers = re.findall(r'\b([1-9]|1[0-7])\b', response.split('\n')[0])
+    numbers = re.findall(r'\b([1-9]|1[0-7])\b', response)
     return numbers[:5]
- 
+
  
 def build_sdg_prompt(module_data, sdg_descriptions):
-    return f"""You are an SDG assessment expert. Analyze if this module embeds the listed SDGs.
+    # Build individual SDG entries
+    sdg_entries = []
+    for desc in sdg_descriptions:
+        sdg_match = re.search(r'SDG (\d+):', desc)
+        if sdg_match:
+            sdg_num = sdg_match.group(1)
+            sdg_name = desc.split(':')[1].split('\n')[0].strip()
+            sdg_entries.append(f"SDG {sdg_num}: {sdg_name}")
+    
+    return f"""Analyze each SDG below for this university module:
 
-MODULE DATA:
+MODULE:
 Learning Objectives: {module_data[3]}
 Content: {module_data[2]}
-Assessment: {module_data[4]}
 
-SDG DESCRIPTIONS:
-{chr(10).join(sdg_descriptions)}
+ANALYZE THESE SDGs:
+{chr(10).join(sdg_entries)}
 
-ANALYSIS TASK:
-For each SDG above, determine:
-1. Is it embedded in the module? (Yes/No)
-2. If Yes, rate strength (1-4: 1=weak, 4=very strong)
+For each SDG listed above, determine if it's embedded in the module.
 
-REQUIRED OUTPUT FORMAT:
-Respond with ONLY valid JSON array. No other text.
-
+OUTPUT FORMAT - JSON array with ALL SDGs listed above:
 [
-  {{
-    "SDG_NUMBER": 4,
-    "SDG_NAME": "Quality Education",
-    "EMBEDDED": "Yes",
-    "RATING": 3
-  }},
-  {{
-    "SDG_NUMBER": 13,
-    "SDG_NAME": "Climate Action",
-    "EMBEDDED": "No", 
-    "RATING": ""
-  }}
+  {{"SDG_NUMBER": 4, "SDG_NAME": "Quality Education", "EMBEDDED": "Yes"}},
+  {{"SDG_NUMBER": 8, "SDG_NAME": "Decent Work", "EMBEDDED": "No"}},
+  {{"SDG_NUMBER": 13, "SDG_NAME": "Climate Action", "EMBEDDED": "Yes"}},
+  {{"SDG_NUMBER": 9, "SDG_NAME": "Industry Innovation", "EMBEDDED": "No"}},
+  {{"SDG_NUMBER": 17, "SDG_NAME": "Partnerships", "EMBEDDED": "Yes"}}
 ]
 
-JSON RESPONSE:"""
+JSON OUTPUT:"""
+
 
 
 def initialize_embedder():
@@ -109,38 +116,61 @@ def retrieve_context(query, embedder, index, chunks, k=4):
     return [chunks[i] for i in indices[0]]
 
 def build_section_prompt(section_name, module_data, context):
-    context_text = "\n".join(context)
-    
-    return f"""You are an ESD assessment expert analyzing a university module for {section_name}.
+    if section_name == "Competencies":
+        # Extract individual competencies from context
+        competency_list = []
+        for ctx in context:
+            competencies = re.findall(r'([A-Z][^:]*competency): ([^.]*\.)', ctx)
+            competency_list.extend(competencies)
+        
+        competency_text = "\n".join([f"- {name}: {desc}" for name, desc in competency_list[:6]])
+        
+        return f"""Analyze this university module for ESD competencies:
 
-MODULE DATA:
+MODULE:
 Learning Objectives: {module_data[3]}
 Content: {module_data[2]}
 Assessment: {module_data[4]}
 
-REFERENCE FRAMEWORK:
-{context_text}
+ESD COMPETENCIES TO CHECK:
+{competency_text}
 
-ANALYSIS QUESTIONS:
-1. Are there direct references to {section_name.lower()} concepts?
-2. How strongly embedded are {section_name.lower()} elements?
-3. What type of competency links exist?
+TASK: For each competency above, determine if the module develops it.
 
-REQUIRED JSON OUTPUT:
+OUTPUT FORMAT:
 {{
-    "analysis": "Brief analysis in 1-2 sentences",
-    "direct_reference": true,
-    "embedding_rating": 3,
-    "competency_links": "Explicit"
+    "competencies_found": [
+        {{"name": "Systems thinking competency", "present": "Yes", "evidence": "Module covers complex systems"}},
+        {{"name": "Critical thinking competency", "present": "No", "evidence": "No evidence found"}}
+    ],
+    "overall_rating": 3
 }}
 
-RULES:
-- direct_reference: true or false only
-- embedding_rating: number 0-4 only
-- competency_links: "Explicit", "Implicit", or "None" only
-- analysis: maximum 50 words
+JSON OUTPUT:"""
+    
+    else:  # Pedagogy
+        return f"""Analyze this university module for ESD pedagogical approaches:
 
-JSON RESPONSE:"""
+MODULE:
+Learning Objectives: {module_data[3]}
+Content: {module_data[2]}
+Assessment: {module_data[4]}
+
+PEDAGOGICAL APPROACHES TO CHECK:
+{chr(10).join(context)}
+
+TASK: Identify which pedagogical approaches are used in this module.
+
+OUTPUT FORMAT:
+{{
+    "approaches_found": [
+        {{"name": "Learner-centred approach", "present": "Yes", "evidence": "Students construct knowledge"}},
+        {{"name": "Action-oriented learning", "present": "No", "evidence": "No practical projects"}}
+    ],
+    "overall_assessment": "Module uses some ESD pedagogical approaches"
+}}
+
+JSON OUTPUT:"""
 
 
 def build_synthesis_prompt(answers, context):
@@ -170,6 +200,28 @@ RULES:
 - reason: maximum 20 words explaining decision
 
 JSON RESPONSE:"""
+
+def extract_valid_json(response_text):
+    """Extract valid JSON from model response"""
+    # Try to find JSON patterns
+    patterns = [
+        r'\[[\s\S]*?\]',  # Array
+        r'\{[\s\S]*?\}'   # Object
+    ]
+    
+    for pattern in patterns:
+        matches = re.findall(pattern, response_text)
+        for match in matches:
+            try:
+                # Test if it's valid JSON
+                import json
+                json.loads(match)
+                return match
+            except:
+                continue
+    
+    # If no valid JSON found, return the response
+    return response_text.strip()
 
 
 # ======== Main Workflow ========
@@ -214,13 +266,14 @@ def main():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=600,     # Increased for complete responses
-        temperature=0.0,        # Set to 0 for consistent outputs
-        top_p=0.9,             # Focused sampling
-        do_sample=False,       # Deterministic output
+        max_new_tokens=600,
+        do_sample=True,
+        temperature=0.1,     # Very low but not 0
+        top_p=0.9,
         pad_token_id=tokenizer.eos_token_id,
         return_full_text=False,
-        repetition_penalty=1.05
+        repetition_penalty=1.05,
+        use_cache=True
     )
 
 
@@ -235,7 +288,9 @@ def main():
     if sdg_descriptions:
         sdg_prompt = build_sdg_prompt(module_data, sdg_descriptions)
         sdg_response = pipe(sdg_prompt)
-        results["SDG"] = sdg_response[0]['generated_text']
+        cleaned_result = extract_valid_json(sdg_response[0]['generated_text'])
+
+        results["SDG"] = cleaned_result
     else:
         results["SDG"] = '{"sdg_coverage": "No evidence"}'
     print("SDG Analysis Result:")
@@ -257,7 +312,8 @@ def main():
          # Build and run the prompt for each section
         prompt = build_section_prompt(section, module_data, context)
         response = pipe(prompt)
-        results[section] = response[0]['generated_text']
+        cleaned_response = extract_valid_json(response[0]['generated_text'])
+        results[section] = cleaned_response
         print(f"{section} Analysis Result:")
         print(results[section])
 
