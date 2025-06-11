@@ -142,7 +142,7 @@ def main():
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
-            device_map=={"": 0},
+            
             offload_folder=None,
             torch_dtype=torch.float16
         )
@@ -151,7 +151,6 @@ def main():
         tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
-            device_map=={"": 0},
             offload_folder=None,
             torch_dtype=torch.float16
         )
