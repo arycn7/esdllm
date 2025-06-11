@@ -35,13 +35,13 @@ def get_referenced_sdgs(module_data, pipe):
     """Identify which SDGs are referenced in the module"""
     prompt = f"""
     [ROLE] UN SDG Assessment Expert
-    [TASK] List the top 6 UN SUSTAINABLE GOALS numbers (e.g., '4', '13') that may be embedded in the teaching of this module, you can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines. Return ONLY recognized SDG numbers separated by commas. If none, say 'None'.
+    [TASK] List the top 6 UN SUSTAINABLE GOALS numbers (e.g., '4', '13') that may be embedded in the teaching of this module, you can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines. Return ONLY recognized SDG numbers separated by commas. If none, say 'None'. List in order of relevance.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
     Teaching & Learning Methods: {module_data[2]}  # Update if different field
     Assessment: {module_data[4]}
-    [INSTRUCTIONS] Return ONLY numbers separated by commas. If none, say 'None'.
+    [INSTRUCTIONS] List in order of relevance, Return ONLY numbers separated by commas. If none, say 'None'.
     """
     response = pipe(prompt, max_new_tokens=50)[0]['generated_text']
     print("SDG References Response:", response) # Debugging output
