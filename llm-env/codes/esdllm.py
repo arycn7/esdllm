@@ -52,7 +52,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     context = "\n\n".join(sdg_descriptions)
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. you need to complete the task provided and respond as outlined in the task field and format field.
+    [INSTRUCTION] You have been provided with SDGs, and their objectives, that are suspected to be embedded into a module taught at a university. You need to analyze the module details against the each SDG objectives based on provided criteria.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -65,7 +65,6 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     1. Is the SDG embedded in the module? (Yes OR No)
     [CRITERIA]
     If atleast 3 objectives out of the 15 for the Specific SDG are  implied in the module content, the SDG is considered embedded. (Value set to "Yes") Else, If lesser than 3 SDG objectives are implied in the module then value set to"No")
-    
     [FORMAT] JSON with each provided SDG and its embedding status (yes/no) as a key-value pair
     """
 
