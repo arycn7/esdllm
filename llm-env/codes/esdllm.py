@@ -50,7 +50,6 @@ def get_referenced_sdgs(module_data, pipe):
 def build_sdg_prompt(module_data, sdg_descriptions):
     """Build SDG-specific prompt with full descriptions"""
     context = "\n\n".join(sdg_descriptions)
-    print("sdg descriptions:", context)  # Debugging output
     return f"""
     [ROLE] ESD Assessment Expert
     [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. you need to complete the tasks provided and respond as outlined in the task field and format field.
