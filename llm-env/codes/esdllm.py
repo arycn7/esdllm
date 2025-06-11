@@ -64,7 +64,7 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     [TASK] For each Suggested SDG from CONTEXT, separately answer the following based on the criteria:
     1. Is the SDG embedded in the module? (Yes OR No)
     [CRITERIA]
-    If 3 OR MORE objectives out of the 15 for the Specific SDG are  implied in the module content, the SDG is considered embedded. (Value set to "Yes") Else, If lesser than 3 SDG objectives are implied in the module then value set to"No")
+    If 2 OR MORE objectives out of the 15 for the Specific SDG are  implied in the module content, the SDG is considered embedded. (Value set to "Yes") Else, If lesser than 2 SDG objectives are implied in the module then value set to"No")
     [FORMAT] JSON with each provided SDG and its embedding status (yes/no) as a key-value pair
     [EXAMPLE]
     {{
