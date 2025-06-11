@@ -95,7 +95,7 @@ def build_section_prompt(section_name, module_data, context):
     """Generate structured prompts for each analysis section"""
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] Answer strictly using module data and context. If no evidence exists, respond with "No evidence".
+    [INSTRUCTION] Answer strictly using module data and context. If no evidence exists, respond with "No evidence". Treat each subcategory within {section_name} as a separate entity for analysis.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
@@ -105,9 +105,9 @@ def build_section_prompt(section_name, module_data, context):
     [CONTEXT] {context}
     
     [TASK] Analyze for {section_name}:
-    1. Direct references? (Yes/No)
+    1. Direct or slightly indirect references? (Yes/No)
     2. Embedding rating (if yes, 1-4 scale, if no, "None")
-    [FORMAT] JSON {{"{section_name}": "", "direct_references": "Yes/No", "embedding_rating": "1-4/None"}}
+    [FORMAT] JSON {{"{section_name} ": "", "direct_references": "Yes/No", "embedding_rating": "1-4/None"}}
     """
     #redundant, q3
 
