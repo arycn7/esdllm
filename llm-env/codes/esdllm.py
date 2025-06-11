@@ -144,52 +144,23 @@ def build_synthesis_prompt(answers, context):
 
 # ======== Main Workflow ========
 def main():
-    # Initialize hardware
-    login(token="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")
     torch.cuda.empty_cache()
+    print("Available GPUs:", torch.cuda.device_count())
 
-    print("Available GPUs:", torch.cuda.device_count())  # Verify GPU count
-   
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    model_path = os.path.join(base_dir, "models", "SOLAR-10.7B-Instruct-v1.0")
-    os.makedirs(model_path, exist_ok=True)
+    # Model path (already stored locally)
+    model_path = "/home/support/llm/Llama-3.3-70B-Instruct"
 
-    # Configure memory allocation for all GPUs
-    num_gpus = torch.cuda.device_count()
-    max_memory = {i: "20GB" for i in range(num_gpus)}
-    max_memory["cpu"] = "60GB"
+    # Load tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
 
-    quant_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_use_double_quant=True
+    # Load model in full FP16, no quantization
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        device_map={"": 0},           # Fully load on GPU 0
+        torch_dtype=torch.float16,    # Use FP16
+        offload_folder=None
     )
-
-    if os.path.exists(os.path.join(model_path, "config.json")):
-        print("Loading model from local storage...")
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map={"": 0},  # Fully load model on GPU 0
-            torch_dtype=torch.float16,
-            quantization_config=quant_config,
-            offload_folder=None  # Disable offloading completely
-            )
-    else:
-        print("Downloading model from Hugging Face...")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-        model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            device_map={"": 0},  # Fully load model on GPU 0
-            torch_dtype=torch.float16,
-            quantization_config=quant_config,
-            offload_folder=None  # Disable offloading completely
-            )
-        tokenizer.save_pretrained(model_path)
-        model.save_pretrained(model_path)
-        print("Model saved to:", model_path)
-
+    print("Model loaded successfully.")
     # Print device allocation
     print("Model device map:", model.hf_device_map)
 
