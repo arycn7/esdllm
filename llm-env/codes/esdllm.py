@@ -147,7 +147,7 @@ def main():
 
     # Configure memory allocation for all GPUs
     num_gpus = torch.cuda.device_count()
-    max_memory = {i: "10GB" for i in range(num_gpus)}
+    max_memory = {i: "15GB" for i in range(num_gpus)}
     max_memory["cpu"] = "60GB"
 
     quant_config = BitsAndBytesConfig(
