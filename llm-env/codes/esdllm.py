@@ -272,8 +272,8 @@ def main():
         do_sample=True,        # Enable sampling but constrained
         pad_token_id=tokenizer.eos_token_id,
         return_full_text=False,
-        repetition_penalty=1.1,
-        seed=42                # Fix seed for reproducibility
+        repetition_penalty=1.1
+                      
     )
 
 
