@@ -106,9 +106,8 @@ def build_section_prompt(section_name, module_data, context):
     
     [TASK] Analyze for {section_name}:
     1. Direct references? (Yes/No)
-    2. Embedding rating (0-4)
-    3. Competency links (Explicit/Implicit/None) 
-    [FORMAT] JSON
+    2. Embedding rating (if yes, 1-4 scale, if no, "None")
+    [FORMAT] JSON {{"{section_name}": "", "direct_references": "Yes/No", "embedding_rating": "1-4/None"}}
     """
     #redundant, q3
 
@@ -120,7 +119,7 @@ def build_synthesis_prompt(answers, context):
     [ROLE] ESD Certification Auditor
     [INSTRUCTIONS] {Instructions}
     [ANALYSES] {answers}
-    [CRITERIA] Requires ≥2 categories with score ≥3 
+    [CRITERIA] Requires one of the following SDGs: 8,9,10 or 12 AND one of the following SDGs: 1,11,16,7,3,4,5,2 AND one of the following SDGs: 13,14,15,6 AND at least one Competency AND at least one Pedagogical approach.
     [TASK] Final determination with RFC 2119-style justification
     [FORMAT] {{"decision": "Yes/No", "reason": "..."}}
     """
