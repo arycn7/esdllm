@@ -234,7 +234,6 @@ def main():
             context_chunks = pedagogy_chunks
             faiss_index = pedagogy_index
         context = retrieve_context(query, embedder, faiss_index, context_chunks)
-        print(f"Retrieved context for {section}: {context}")
          # Build and run the prompt for each section
         prompt = build_section_prompt(section, module_data, context)
         response = pipe(prompt)
@@ -245,8 +244,7 @@ def main():
     # === Final Synthesis ===
     synthesis_context = retrieve_context("ESD certification criteria", embedder, faiss_index, context_chunks) #needs to be changed
     final_prompt = build_synthesis_prompt(results, synthesis_context) #synthesis context needs to be changed
-    print("Final Prompt for Synthesis:")
-    print(final_prompt)
+  
     print("___")
     final_decision = pipe(final_prompt)
     
