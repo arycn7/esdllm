@@ -72,7 +72,7 @@ TASK INSTRUCTIONS:
         - 2 = moderate
         - 3 = strong
         - 4 = very strong
-    5. If fewer than 3 objectives are reflected, output "No evidence" and leave rating blank.
+    5. If fewer than 3 objectives are reflected, output "No" in the EMBEDDED field and leave rating blank.
 
 STRICT OUTPUT FORMAT:
 Output a JSON array only. No explanation.
@@ -81,8 +81,8 @@ Output a JSON array only. No explanation.
   {{
     "SDG_NUMBER": <number>,
     "SDG_NAME": "<name>",
-    "EMBEDDED": "<SDG number or 'No evidence'>",
-    "RATING": "<rating or empty>"
+    "EMBEDDED": "<'Yes' or 'No'>",
+    "RATING": "<rating or empty if no>"
   }},
   ...
 ]
