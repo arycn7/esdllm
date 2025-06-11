@@ -148,7 +148,7 @@ def main():
     print("Available GPUs:", torch.cuda.device_count())
 
     # Model path (already stored locally)
-    model_path = "/home/support/llm/Llama-3.3-70B-Instruct"
+    model_path = "/home/support/llm/Llama-3.1-8B"
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path)
