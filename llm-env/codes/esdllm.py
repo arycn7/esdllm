@@ -50,7 +50,7 @@ def get_referenced_sdgs(module_data, pipe):
 def build_sdg_prompt(module_data, sdg_descriptions):
     """Build SDG-specific prompt with full descriptions"""
     context = "\n\n".join(sdg_descriptions)
-    print("sdg descriptions:", context)  # Debugging output
+   
     return f"""
     [ROLE] ESD Assessment Expert
     [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. you need to complete the tasks provided and respond as outlined in the task field and format field.
@@ -62,9 +62,10 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     
     [CONTEXT] {context}
     
-    [TASK] For each Suggested SDG from CONTEXT answer the followinf:
-    1. Is the SDG embedded in the module? If atleast 3 learning objectives out of the 15 for the Specific SDG are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG numbers separated by commas)
-    2. How embedded are the referenced SDGs? (Rate 1-4)
+    [TASK] For each Suggested SDG from CONTEXT answer the following separately:
+    1. Is the SDG embedded in the module? If atleast 3 learning objectives out of the 15 for the Specific SDG are somewhat implied in the module content, the SDG is considered embedded. (Return The referenced SDG number if embedded, otherwise "No evidence")
+    2. If embedded, rate the the SDG's embedding in the module on a scale of 1-4 (1=weak, 4=strong)
+ 
     
     [FORMAT] JSON
     """
