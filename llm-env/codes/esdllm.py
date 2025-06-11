@@ -52,23 +52,16 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     context = "\n\n".join(sdg_descriptions)
    
     return f"""
-You are an SDG Assessment Expert.
-
-You are given:
-- Module Learning Objectives: {module_data[3]}
-- Module Content: {module_data[2]}
-- Module Assessment: {module_data[4]}
-- SDG Data: {context}
-
-TASK:
+[ROLE]:You are an SDG Assessment Expert.
+[TASK]:
 For each SDG, decide if it is embedded in the module.
 
-RULES:
+[RULES]:
 - An SDG is embedded if at least 3 of its 15 learning objectives are somewhat implied by the module.
 - If embedded, give a rating from 1 (weak) to 4 (very strong).
 - If not embedded, write "No evidence" and leave rating blank.
 
-FORMAT (strict JSON array, no explanations):
+[FORMAT]: (strict JSON array, no explanations):
 
 [
   {{
@@ -78,6 +71,12 @@ FORMAT (strict JSON array, no explanations):
     "RATING": "<rating or empty>"
   }}
 ]
+
+[You are given]:
+- Module Learning Objectives: {module_data[3]}
+- Module Content: {module_data[2]}
+- Module Assessment: {module_data[4]}
+- SDG Data: {context}
 """
 
 
