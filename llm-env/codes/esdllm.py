@@ -35,7 +35,7 @@ def get_referenced_sdgs(module_data, pipe):
     """Identify which SDGs are referenced in the module"""
     prompt = f"""
     [ROLE] UN SDG Assessment Expert
-    [TASK] List the top 6 UN SUSTAINABLE GOALS numbers (e.g., '4', '13') that may be embedded in the teaching of this module, you can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines. Return ONLY recognized SDG numbers separated by commas. If none, say 'None'. List in order of relevance.
+    [TASK] List the top 6  UN SUSTAINABLE GOALS numbers (e.g., '4', '13') that may be embedded in the teaching of this module in order of highest embedding to lowest, it does not need to be in numerical order. You can use your understanding of the 17 UN SDGs. You can be lenient and read between the lines. Return ONLY recognized SDG numbers separated by commas. If none, say 'None'. List in order of relevance.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
