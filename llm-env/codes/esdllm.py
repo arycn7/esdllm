@@ -52,17 +52,19 @@ def build_sdg_prompt(module_data, sdg_descriptions):
     context = "\n\n".join(sdg_descriptions)
     return f"""
     [ROLE] ESD Assessment Expert
-    [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. you need to complete the tasks provided and respond as outlined in the task field and format field.
+    [INSTRUCTION] You have been provided with SDGs, and their descriptions, that are suspected to be embedded into a module taught at a university. you need to complete the task provided and respond as outlined in the task field and format field.
     [MODULE DATA]
     Module Learning Objectives: {module_data[3]}
     Content: {module_data[2]}
     Teaching & Learning Methods: {module_data[2]}  # Update if different field
     Assessment: {module_data[4]}
     
-    [CONTEXT] {context}
+    [Potential SDGs and their objectives] {context}
     
-    [TASK] For each Suggested SDG from CONTEXT, separately answer the following:
-    1. Is the SDG embedded in the module? If atleast 3 objectives out of the 15 for the Specific SDG are somewhat implied in the module content, the SDG is considered embedded. (Value set to "Yes") If lesser than 3 SDG objectives are implied in the module then value set to"No")
+    [TASK] For each Suggested SDG from CONTEXT, separately answer the following based on the criteria:
+    1. Is the SDG embedded in the module? (Yes OR No)
+    [CRITERIA]
+    If atleast 3 objectives out of the 15 for the Specific SDG are  implied in the module content, the SDG is considered embedded. (Value set to "Yes") Else, If lesser than 3 SDG objectives are implied in the module then value set to"No")
     
     [FORMAT] JSON with each provided SDG and its embedding status (yes/no) as a key-value pair
     """
