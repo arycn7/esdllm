@@ -171,23 +171,21 @@ def main():
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
-            device_map="auto",
-            max_memory=max_memory,
-            offload_folder="./offload",
+            device_map={"": 0},  # Fully load model on GPU 0
             torch_dtype=torch.float16,
-            quantization_config=quant_config
-        )
+            quantization_config=quant_config,
+            offload_folder=None  # Disable offloading completely
+            )
     else:
         print("Downloading model from Hugging Face...")
         tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
         model = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID,
-            device_map="auto",
-            max_memory=max_memory,
-            offload_folder="./offload",
+            model_path,
+            device_map={"": 0},  # Fully load model on GPU 0
             torch_dtype=torch.float16,
-            quantization_config=quant_config
-        )
+            quantization_config=quant_config,
+            offload_folder=None  # Disable offloading completely
+            )
         tokenizer.save_pretrained(model_path)
         model.save_pretrained(model_path)
         print("Model saved to:", model_path)
