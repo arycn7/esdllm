@@ -40,7 +40,7 @@ Learning Objectives: {module_data[3]}
 Content: {module_data[2]}
 Assessment: {module_data[4]}
 
-UN SDGs (pick the 5 most relevant):
+UN SDGs (pick the 5 most relevant to the best of your knowledge and to this module):
 1-No Poverty, 2-Zero Hunger, 3-Good Health, 4-Quality Education, 5-Gender Equality, 
 6-Clean Water, 7-Affordable Energy, 8-Decent Work, 9-Industry Innovation, 
 10-Reduced Inequalities, 11-Sustainable Cities, 12-Responsible Consumption, 
@@ -84,7 +84,7 @@ ANALYZE THESE SDGs:
 
 For each SDG listed above, determine if it's embedded in the module.
 
-OUTPUT FORMAT - JSON array with ALL SDGs listed above:
+EXAMPLE OF OUTPUT FORMAT - JSON array with ALL SDGs listed above:
 [
   {{"SDG_NUMBER": 4, "SDG_NAME": "Quality Education", "EMBEDDED": "Yes"}},
   {{"SDG_NUMBER": 8, "SDG_NAME": "Decent Work", "EMBEDDED": "No"}},
