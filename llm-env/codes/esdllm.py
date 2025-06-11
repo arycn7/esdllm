@@ -32,7 +32,7 @@ def smart_chunk_sdg_descriptions(context_text):
     return sdg_chunks
 
 def get_referenced_sdgs(module_data, pipe):
-    prompt = f"""You are analyzing a university module to find the MOST RELEVANT UN SDGs.
+    prompt = f"""You are analyzing a university module to find the MOST RELEVANT UN SDGs to the best of your knowledge of the UN Sustainable development goals
 
 MODULE DETAILS:
 Title: {module_data[0]}
@@ -40,13 +40,7 @@ Learning Objectives: {module_data[3]}
 Content: {module_data[2]}
 Assessment: {module_data[4]}
 
-UN SDGs (pick the 5 most relevant ,in order, to the best of your knowledge and to this module):
-1-No Poverty, 2-Zero Hunger, 3-Good Health, 4-Quality Education, 5-Gender Equality, 
-6-Clean Water, 7-Affordable Energy, 8-Decent Work, 9-Industry Innovation, 
-10-Reduced Inequalities, 11-Sustainable Cities, 12-Responsible Consumption, 
-13-Climate Action, 14-Life Below Water, 15-Life on Land, 16-Peace Justice, 17-Partnerships
-
-OUTPUT FORMAT: Just 5 numbers separated by commas (most relevant first)
+OUTPUT FORMAT: Only return 5 SDG numbers separated by commas (most relevant first)
 EXAMPLE: 4, 9, 8, 17, 13
 
 ANSWER:"""
