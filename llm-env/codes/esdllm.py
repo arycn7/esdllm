@@ -40,24 +40,18 @@ Learning Objectives: {module_data[3]}
 Content: {module_data[2]}
 Assessment: {module_data[4]}
 
-UN SDGs (pick the 5 most relevant to the best of your knowledge and to this module):
+UN SDGs (pick the 5 most relevant ,in order, to the best of your knowledge and to this module):
 1-No Poverty, 2-Zero Hunger, 3-Good Health, 4-Quality Education, 5-Gender Equality, 
 6-Clean Water, 7-Affordable Energy, 8-Decent Work, 9-Industry Innovation, 
 10-Reduced Inequalities, 11-Sustainable Cities, 12-Responsible Consumption, 
 13-Climate Action, 14-Life Below Water, 15-Life on Land, 16-Peace Justice, 17-Partnerships
 
-Think about:
-- What field is this module in?
-- What skills does it teach?
-- What topics does it cover?
-- How could it impact society?
-
-OUTPUT: Just 5 numbers separated by commas (most relevant first)
+OUTPUT FORMAT: Just 5 numbers separated by commas (most relevant first)
 EXAMPLE: 4, 9, 8, 17, 13
 
 ANSWER:"""
 
-    response = pipe(prompt, max_new_tokens=50)[0]['generated_text']
+    response = pipe(prompt, max_new_tokens=100)[0]['generated_text']
     print("SDG References Response:", response)
     numbers = re.findall(r'\b([1-9]|1[0-7])\b', response)
     return numbers[:5]
