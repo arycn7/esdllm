@@ -135,24 +135,34 @@ def main():
     os.makedirs(model_path, exist_ok=True)
 
     # Configure memory allocation for all GPUs
+    num_gpus = torch.cuda.device_count()
 
+    quant_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_use_double_quant=True
+    )
 
     if os.path.exists(os.path.join(model_path, "config.json")):
         print("Loading model from local storage...")
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
-            
-            offload_folder=None,
-            torch_dtype=torch.float16
+            device_map="auto",
+            offload_folder="./offload",
+            torch_dtype=torch.float16,
+            quantization_config=quant_config
         )
     else:
         print("Downloading model from Hugging Face...")
         tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
         model = AutoModelForCausalLM.from_pretrained(
-            model_path,
-            offload_folder=None,
-            torch_dtype=torch.float16
+            MODEL_ID,
+            device_map="auto",
+            offload_folder="./offload",
+            torch_dtype=torch.float16,
+            quantization_config=quant_config
         )
         tokenizer.save_pretrained(model_path)
         model.save_pretrained(model_path)
