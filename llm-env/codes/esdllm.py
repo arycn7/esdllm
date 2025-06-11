@@ -32,61 +32,45 @@ def smart_chunk_sdg_descriptions(context_text):
     return sdg_chunks
 
 def get_referenced_sdgs(module_data, pipe):
-    prompt = f"""You are a UN SDG expert. Your task is to identify ANY possible connections between this university module and the 17 UN Sustainable Development Goals.
+    prompt = f"""You are an SDG classification expert. Your task is to identify UN Sustainable Development Goal numbers that relate to this university module.
 
-MISSION: Be generous and creative in finding connections - look for indirect relationships, implied topics, and potential applications.
-
-MODULE INFORMATION:
----
+MODULE CONTENT:
 Learning Objectives: {module_data[3]}
----
-Content Overview: {module_data[2]}
----
-Assessment Methods: {module_data[4]}
----
-
-The 17 SDGs are: 1-No Poverty, 2-Zero Hunger, 3-Good Health, 4-Quality Education, 5-Gender Equality, 6-Clean Water, 7-Affordable Energy, 8-Decent Work, 9-Industry Innovation, 10-Reduced Inequalities, 11-Sustainable Cities, 12-Responsible Consumption, 13-Climate Action, 14-Life Below Water, 15-Life on Land, 16-Peace and Justice, 17-Partnerships
-
-TASK: List exactly 5 SDG numbers that could relate to this module. Be lenient - if there's any possible connection, include it.
-
-OUTPUT FORMAT: Just the numbers separated by commas
-EXAMPLE: 4, 8, 9, 13, 17"""
-
-    response = pipe(prompt, max_new_tokens=100)[0]['generated_text']
-    print("SDG References Response:", response)
-    return re.findall(r'\b([1-9]|1[0-7])\b', response)
-
-
-def build_sdg_prompt(module_data, sdg_descriptions):
-    return f"""You are an expert in UN Sustainable Development Goals assessment.
-
-**YOUR ROLE**: Determine if this university module meaningfully connects to the listed SDGs.
-
-**MODULE TO ANALYZE**:
-Learning Objectives: {module_data[3]}
-
 Content: {module_data[2]}
-
 Assessment: {module_data[4]}
 
-**SDGs TO EVALUATE**:
+TASK: Return exactly 5 SDG numbers (1-17) that best relate to this module, in order of relevance.
+
+RESPONSE FORMAT: Only numbers separated by commas
+EXAMPLE: 4, 8, 13, 9, 17
+
+RESPONSE:"""
+
+    response = pipe(prompt, max_new_tokens=30)[0]['generated_text']
+    print("SDG References Response:", response)
+    # Extract only the numbers from the response
+    numbers = re.findall(r'\b([1-9]|1[0-7])\b', response.split('\n')[0])
+    return numbers[:5]
+ 
+ 
+def build_sdg_prompt(module_data, sdg_descriptions):
+    return f"""You are an SDG assessment expert. Analyze if this module embeds the listed SDGs.
+
+MODULE DATA:
+Learning Objectives: {module_data[3]}
+Content: {module_data[2]}
+Assessment: {module_data[4]}
+
+SDG DESCRIPTIONS:
 {chr(10).join(sdg_descriptions)}
 
-**EVALUATION CRITERIA**:
-- Does the module content align with SDG themes?
-- Do learning objectives support SDG targets?
-- Would students gain relevant knowledge/skills?
+ANALYSIS TASK:
+For each SDG above, determine:
+1. Is it embedded in the module? (Yes/No)
+2. If Yes, rate strength (1-4: 1=weak, 4=very strong)
 
-**RATING SCALE**:
-- EMBEDDED "Yes" = Clear connection exists
-- EMBEDDED "No" = No meaningful connection
-- RATING 1 = Weak connection
-- RATING 2 = Moderate connection  
-- RATING 3 = Strong connection
-- RATING 4 = Very strong connection
-
-**OUTPUT REQUIREMENT**: 
-Respond with ONLY valid JSON in this exact format:
+REQUIRED OUTPUT FORMAT:
+Respond with ONLY valid JSON array. No other text.
 
 [
   {{
@@ -97,13 +81,13 @@ Respond with ONLY valid JSON in this exact format:
   }},
   {{
     "SDG_NUMBER": 13,
-    "SDG_NAME": "Climate Action", 
-    "EMBEDDED": "No",
+    "SDG_NAME": "Climate Action",
+    "EMBEDDED": "No", 
     "RATING": ""
   }}
 ]
 
-Start your response with [ and end with ]"""
+JSON RESPONSE:"""
 
 
 def initialize_embedder():
@@ -127,69 +111,66 @@ def retrieve_context(query, embedder, index, chunks, k=4):
 def build_section_prompt(section_name, module_data, context):
     context_text = "\n".join(context)
     
-    return f"""**ROLE**: You are an Education for Sustainable Development (ESD) analyst.
+    return f"""You are an ESD assessment expert analyzing a university module for {section_name}.
 
-**TASK**: Analyze this university module for {section_name} elements.
-
-**MODULE DATA**:
----
+MODULE DATA:
 Learning Objectives: {module_data[3]}
----
-Module Content: {module_data[2]}  
----
-Assessment Methods: {module_data[4]}
----
+Content: {module_data[2]}
+Assessment: {module_data[4]}
 
-**REFERENCE FRAMEWORK**:
----
+REFERENCE FRAMEWORK:
 {context_text}
----
 
-**ANALYSIS QUESTIONS**:
-1. Are there direct mentions of {section_name.lower()} concepts?
-2. How strongly are {section_name.lower()} elements embedded? (0=none, 4=very strong)
-3. Are competency links explicit, implicit, or absent?
+ANALYSIS QUESTIONS:
+1. Are there direct references to {section_name.lower()} concepts?
+2. How strongly embedded are {section_name.lower()} elements?
+3. What type of competency links exist?
 
-**REQUIRED OUTPUT FORMAT**:
+REQUIRED JSON OUTPUT:
 {{
-    "analysis": "Brief explanation of findings",
+    "analysis": "Brief analysis in 1-2 sentences",
     "direct_reference": true,
     "embedding_rating": 3,
     "competency_links": "Explicit"
 }}
 
-Respond with ONLY the JSON object above. No other text."""
+RULES:
+- direct_reference: true or false only
+- embedding_rating: number 0-4 only
+- competency_links: "Explicit", "Implicit", or "None" only
+- analysis: maximum 50 words
+
+JSON RESPONSE:"""
 
 
 def build_synthesis_prompt(answers, context):
-    return f"""**ROLE**: ESD Certification Auditor
+    return f"""You are an ESD certification auditor making the final decision.
 
-**MISSION**: Make final certification decision based on analysis results.
-
-**ANALYSIS RESULTS**:
----
+ANALYSIS RESULTS:
 {str(answers)}
----
 
-**CERTIFICATION CRITERIA**:
-The module must demonstrate:
-- At least ONE embedded SDG from economic category (SDGs 8, 9, 10, 12)
-- At least ONE embedded SDG from social category (SDGs 1, 2, 3, 4, 5, 11, 16)  
-- At least ONE embedded SDG from environmental category (SDGs 6, 7, 13, 14, 15)
-- Evidence of competency development
-- Evidence of pedagogical approaches
+CERTIFICATION CRITERIA:
+- Must have at least one SDG from economic category (8,9,10,12) 
+- Must have at least one SDG from social category (1,2,3,4,5,11,16)
+- Must have at least one SDG from environmental category (6,7,13,14,15)
+- Must show competency development evidence
+- Must show pedagogical approach evidence
 
-**DECISION RULES**:
-- "Yes" = All criteria met
-- "No" = One or more criteria missing
+DECISION TASK:
+Based on the analyses above, does this module meet ESD certification criteria?
 
-**REQUIRED OUTPUT**:
+REQUIRED JSON OUTPUT:
 {{
     "decision": "Yes",
-    "reason": "Module demonstrates required SDG coverage and pedagogical elements"
+    "reason": "Module meets criteria with embedded SDGs and competency evidence"
 }}
 
-Provide ONLY the JSON response above."""
+RULES:
+- decision: "Yes" or "No" only
+- reason: maximum 20 words explaining decision
+
+JSON RESPONSE:"""
+
 
 # ======== Main Workflow ========
 def main():
@@ -233,14 +214,15 @@ def main():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=800,  # Increased from 400
-        temperature=0.3,     # Slightly higher from 0.2
-        top_p=0.9,          # Reduced from 0.95 for more focused responses
-        max_length=8192,
-        repetition_penalty=1.1,
+        max_new_tokens=600,     # Increased for complete responses
+        temperature=0.0,        # Set to 0 for consistent outputs
+        top_p=0.9,             # Focused sampling
+        do_sample=False,       # Deterministic output
+        pad_token_id=tokenizer.eos_token_id,
         return_full_text=False,
-        do_sample=True,     # Add explicit sampling
+        repetition_penalty=1.05
     )
+
 
     # Initialize results
     results = {}
