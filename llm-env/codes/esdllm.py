@@ -266,15 +266,16 @@ def main():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=600,
-        do_sample=True,
-        temperature=0.1,     # Very low but not 0
-        top_p=0.9,
+        max_new_tokens=100,
+        temperature=0.1,        # Very low but not 0 - allows minimal variance
+        top_p=0.7,             # More constrained than 0.9
+        do_sample=True,        # Enable sampling but constrained
         pad_token_id=tokenizer.eos_token_id,
         return_full_text=False,
-        repetition_penalty=1.05,
-        use_cache=True
+        repetition_penalty=1.1,
+        seed=42                # Fix seed for reproducibility
     )
+
 
 
     # Initialize results
