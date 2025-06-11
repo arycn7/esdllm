@@ -230,7 +230,7 @@ def main():
     print("Available GPUs:", torch.cuda.device_count())
 
     # Model path (already stored locally)
-    model_path = "/home/support/llm/DeepSeek-R1-Distill-Llama-70B"
+    model_path = "/home/support/llm/DeepSeek-R1"
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path)
